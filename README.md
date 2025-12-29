@@ -26,8 +26,7 @@ LINE（任意）
 
 認証/ポイント連携（任意。LINEで「ログイン」「ポイント」を使う場合）
 
-- `TOYUTOYU_WP_BASE_URL`: 既定 `https://toyutoyu.com/app`
-- `TOYUTOYU_WP_WEBHOOK_SECRET`: （任意）`POST /wp-json/toyutoyu/v1/auth-check` の `X-Toyutoyu-Webhook-Secret`（WP側設定により不要な場合あり）
+- `TOYUTOYU_WP_BASE_URL`: 既定 `https://toyutoyu.com/app/`
 - `LOGIN_FLOW_TTL_MS`: ログイン途中状態のTTL（既定 10分）
 - `LOGGED_IN_TTL_MS`: ログイン済み状態のTTL（既定 60分）
 

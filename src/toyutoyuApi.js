@@ -7,24 +7,24 @@ function withTimeout(timeoutMs) {
   };
 }
 
-async function authCheck({ baseUrl, webhookSecret, email, password, timeoutMs = 10000 }) {
+function normalizeBaseUrl(baseUrl) {
+  const raw = String(baseUrl ?? "").trim();
+  if (!raw) return "";
+  return raw.endsWith("/") ? raw : `${raw}/`;
+}
+
+async function authCheck({ baseUrl, email, password, timeoutMs = 10000 }) {
   const { signal, clear } = withTimeout(timeoutMs);
 
   try {
-    const url = new URL("/wp-json/toyutoyu/v1/auth-check", baseUrl);
-
-    const headers = {
-      "content-type": "application/json",
-    };
-
-    // webhookSecret is optional depending on WP side configuration.
-    if (webhookSecret) {
-      headers["x-toyutoyu-webhook-secret"] = webhookSecret;
-    }
+    const base = normalizeBaseUrl(baseUrl);
+    const url = new URL("wp-json/toyutoyu/v1/auth-check", base);
 
     const res = await fetch(url, {
       method: "POST",
-      headers,
+      headers: {
+        "content-type": "application/json",
+      },
       body: JSON.stringify({ email, password }),
       signal,
     });
@@ -66,7 +66,8 @@ async function getUserPoints({ baseUrl, email, timeoutMs = 10000 }) {
   const { signal, clear } = withTimeout(timeoutMs);
 
   try {
-    const url = new URL("/wp-json/toyutoyu/v1/user-points", baseUrl);
+    const base = normalizeBaseUrl(baseUrl);
+    const url = new URL("wp-json/toyutoyu/v1/user-points", base);
     url.searchParams.set("email", email);
 
     const res = await fetch(url, {

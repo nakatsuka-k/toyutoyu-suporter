@@ -23,8 +23,7 @@ const LINE_CHANNEL_ACCESS_TOKEN = getEnv("LINE_CHANNEL_ACCESS_TOKEN", { defaultV
 const LINE_TO = getEnv("LINE_TO", { defaultValue: "" });
 const LINE_BROADCAST = getEnv("LINE_BROADCAST", { defaultValue: "0" }) === "1";
 
-const TOYUTOYU_WP_BASE_URL = getEnv("TOYUTOYU_WP_BASE_URL", { defaultValue: "https://toyutoyu.com/app" });
-const TOYUTOYU_WP_WEBHOOK_SECRET = getEnv("TOYUTOYU_WP_WEBHOOK_SECRET", { defaultValue: "" });
+const TOYUTOYU_WP_BASE_URL = getEnv("TOYUTOYU_WP_BASE_URL", { defaultValue: "https://toyutoyu.com/app/" });
 const LOGIN_FLOW_TTL_MS = Number(getEnv("LOGIN_FLOW_TTL_MS", { defaultValue: String(10 * 60 * 1000) }));
 const LOGGED_IN_TTL_MS = Number(getEnv("LOGGED_IN_TTL_MS", { defaultValue: String(60 * 60 * 1000) }));
 
@@ -139,7 +138,6 @@ async function handleLineText({ userId, replyToken, text }) {
     try {
       const result = await authCheck({
         baseUrl: TOYUTOYU_WP_BASE_URL,
-        webhookSecret: TOYUTOYU_WP_WEBHOOK_SECRET,
         email: sess.email,
         password: t,
       });
