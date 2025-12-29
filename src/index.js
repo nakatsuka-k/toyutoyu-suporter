@@ -13,7 +13,7 @@ const PORT = Number(getEnv("PORT", { defaultValue: "8080" }));
 
 const TARGET_URLS = parseTargetUrls(getEnv("TARGET_URLS"));
 const TIMEOUT_MS = Number(getEnv("TIMEOUT_MS", { defaultValue: "10000" }));
-const CRON_SCHEDULE = getEnv("CRON_SCHEDULE", { defaultValue: "0 * * * *" });
+const CRON_SCHEDULE = getEnv("CRON_SCHEDULE", { defaultValue: "*/15 * * * *" });
 const CRON_TIMEZONE = getEnv("CRON_TIMEZONE", { defaultValue: "Asia/Tokyo" });
 
 const LINE_CHANNEL_SECRET = getEnv("LINE_CHANNEL_SECRET", { defaultValue: "" });
@@ -102,7 +102,7 @@ async function runCheckOnce() {
   await notify(message);
 }
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   // eslint-disable-next-line no-console
   console.log(`Listening on :${PORT}`);
   // eslint-disable-next-line no-console
