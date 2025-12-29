@@ -1,5 +1,7 @@
 # toyutoyu-suporter
 
+と湯と湯という温泉ポータルサイトが疎通しているかを通知するLine Bot。
+
 `https://toyutoyu.com/app/` と `https://toyutoyu.com/` を15分ごとに疎通確認し、失敗時に通知します。
 
 ## 動作
