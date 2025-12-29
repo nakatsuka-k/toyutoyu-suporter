@@ -7,7 +7,7 @@
 ## 動作
 
 - Cron: 15分ごと（既定: `*/15 * * * *`、タイムゾーン既定: `Asia/Tokyo`）
-- 監視: HTTP 2xx を成功扱い、その他は失敗扱い
+- 監視: HTTP 2xx と 404 を成功扱い、その他は失敗扱い
 - 通知: 常にログ出力。加えてLINE Push通知は環境変数が揃っている場合のみ実施
 
 ## 環境変数
@@ -40,8 +40,10 @@ npm start
 1. シークレットを設定（LINE通知する場合）
 
 ```bash
-fly secrets set LINE_CHANNEL_ACCESS_TOKEN=... LINE_TO=...
+fly secrets set LINE_CHANNEL_ACCESS_TOKEN=...
 ```
+
+※全員配信（Broadcast）では `LINE_TO` は不要です。特定宛先にPushする場合のみ `LINE_TO` を設定してください。
 
 1. デプロイ
 

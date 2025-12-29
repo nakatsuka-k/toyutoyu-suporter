@@ -13,7 +13,7 @@ async function checkUrl(url, { timeoutMs }) {
       },
     });
 
-    const ok = res.status >= 200 && res.status < 300;
+    const ok = (res.status >= 200 && res.status < 300) || res.status === 404;
     return {
       url,
       ok,

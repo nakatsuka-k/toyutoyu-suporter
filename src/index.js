@@ -93,9 +93,9 @@ async function runCheckOnce() {
   }
 
   const message = [
-    "[toyutoyu-suporter] 疎通確認エラー",
+    "【と湯と湯 みまもり】あれれ？サイトが開けないみたいです…（しょんぼり）",
     `時刻(JST): ${nowJstString()}`,
-    "対象:",
+    "うまく確認できなかったURLはこちらです（404はOK扱いです）:",
     formatFailures({ failures }),
   ].join("\n");
 
@@ -118,9 +118,9 @@ cron.schedule(CRON_SCHEDULE, async () => {
     const msg = err && typeof err === "object" && "message" in err ? err.message : String(err);
     await notify(
       [
-        "[toyutoyu-suporter] 監視処理自体が例外",
+        "【と湯と湯 みまもり】ごめんなさい…監視処理でエラーが出ちゃいました",
         `時刻(JST): ${nowJstString()}`,
-        `ERROR: ${msg}`,
+        `内容: ${msg}`,
       ].join("\n")
     );
   }
