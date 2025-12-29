@@ -24,6 +24,13 @@ LINE（任意）
 - `LINE_BROADCAST`: `1` の場合は全員に配信（LINE側のBroadcast権限/制限に依存）
 - `LINE_CHANNEL_SECRET`: Webhook署名検証用（Webhookを使う場合のみ）
 
+認証/ポイント連携（任意。LINEで「ログイン」「ポイント」を使う場合）
+
+- `TOYUTOYU_WP_BASE_URL`: 既定 `https://toyutoyu.com/app`
+- `TOYUTOYU_WP_WEBHOOK_SECRET`: （任意）`POST /wp-json/toyutoyu/v1/auth-check` の `X-Toyutoyu-Webhook-Secret`（WP側設定により不要な場合あり）
+- `LOGIN_FLOW_TTL_MS`: ログイン途中状態のTTL（既定 10分）
+- `LOGGED_IN_TTL_MS`: ログイン済み状態のTTL（既定 60分）
+
 ※ご提示の「Channel」/「Channel secret」のうち、通知（Push）に必須なのは `LINE_CHANNEL_ACCESS_TOKEN` です。
 
 ## ローカル実行
@@ -52,4 +59,13 @@ fly deploy
 ```
 
 Webhookは任意です。必要なら `POST /callback` をLINE Developersで設定してください。
+
+## LINEでの使い方
+
+Webhook（`/callback`）にメッセージが届いた場合、以下の簡易フローで応答します。
+
+- 「ログイン」→ メールアドレス → パスワード（`auth-check` による検証）
+- ログイン後に「ポイント」→ `user-points` をメールアドレスで取得して返信
+
+※ログイン状態はサーバーのメモリ上に保持します（プロセス再起動で消えます）。
 

@@ -17,6 +17,25 @@ async function pushLineMessage({ channelAccessToken, to, text }) {
   }
 }
 
+async function replyLineMessage({ channelAccessToken, replyToken, text }) {
+  const res = await fetch("https://api.line.me/v2/bot/message/reply", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "authorization": `Bearer ${channelAccessToken}`,
+    },
+    body: JSON.stringify({
+      replyToken,
+      messages: [{ type: "text", text }],
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`LINE reply failed: ${res.status} ${res.statusText} ${body}`.trim());
+  }
+}
+
 async function broadcastLineMessage({ channelAccessToken, text }) {
   const res = await fetch("https://api.line.me/v2/bot/message/broadcast", {
     method: "POST",
@@ -37,5 +56,6 @@ async function broadcastLineMessage({ channelAccessToken, text }) {
 
 module.exports = {
   pushLineMessage,
+  replyLineMessage,
   broadcastLineMessage,
 };

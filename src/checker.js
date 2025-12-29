@@ -21,10 +21,24 @@ async function checkUrl(url, { timeoutMs }) {
       statusText: res.statusText,
     };
   } catch (err) {
+    const msg = err && typeof err === "object" && "message" in err ? String(err.message) : String(err);
+
+    // Treat our own timeout abort as OK (requested behavior).
+    // Node's fetch (undici) may throw DOMException/AbortError with message like:
+    // "This operation was aborted".
+    if (/operation was aborted/i.test(msg)) {
+      return {
+        url,
+        ok: true,
+        status: null,
+        statusText: "aborted",
+      };
+    }
+
     return {
       url,
       ok: false,
-      error: err && typeof err === "object" && "message" in err ? err.message : String(err),
+      error: msg,
     };
   } finally {
     clearTimeout(timer);
