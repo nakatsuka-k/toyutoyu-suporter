@@ -49,8 +49,6 @@ function isValidEmail(email) {
 function isAiEligibleText(text) {
   const t = normalizeText(text);
   if (!t) return false;
-  // Don't send credential-related text to AI.
-  if (t.includes("パスワード")) return false;
   // Commands are handled elsewhere.
   if (t === "ログイン" || t === "ポイント" || t === "キャンセル") return false;
   return true;
@@ -147,7 +145,7 @@ function detectGuidedQa(text) {
   if (t.includes("ポイント") && (t.includes("購入") || t.includes("買") || t.includes("チャージ") || t.includes("課金"))) {
     return {
       key: "points_purchase",
-      text: "ポイントの購入は、以下の画像の手順で可能です💳（サブスク・一括・チャージ対応）",
+      text: "ポイントの購入は、以下の画像の手順で可能です�（サブスク・一括・チャージ対応）",
       imageUrls: [
         "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488832_0.jpg",
         "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488833_0.jpg",
@@ -288,22 +286,7 @@ async function handleLineText({ userId, replyToken, text }) {
 
   // If user is NOT in login flow, route other messages to AI (support/inquiry).
   if (!current || current.state !== "login") {
-    if (t.includes("パスワード")) {
-      await replyLineMessage({
-        channelAccessToken: LINE_CHANNEL_ACCESS_TOKEN,
-        replyToken,
-        text:
-          "パスワードに関する案内です。ログインは『ログイン』→メールアドレス→パスワードの順で進めてください。\nパスワードの再設定などはサブスク詳細ページもあわせてご確認ください: https://toyutoyu.com/price",
-      });
-      return;
-    }
-
     if (!OPENAI_API_KEY) {
-      await replyUsage({ replyToken });
-      return;
-    }
-
-    if (!isAiEligibleText(t)) {
       await replyUsage({ replyToken });
       return;
     }
