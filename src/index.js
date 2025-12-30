@@ -86,7 +86,16 @@ function detectGuidedQa(text) {
   }
 
   // Q1: Password reset
-  if (t.includes("パスワード") && (t.includes("再設定") || t.includes("リセット") || t.includes("忘"))) {
+  if (
+    t.includes("パスワード") &&
+    (t.includes("再設定") ||
+      t.includes("リセット") ||
+      t.includes("忘") ||
+      t.includes("わからな") ||
+      t.includes("わかりま") ||
+      t.includes("思い出せ") ||
+      t.includes("変更"))
+  ) {
     return {
       key: "password_reset",
       text: "パスワードの再設定は、以下の画像の手順で行っていただけます📱",
