@@ -60,6 +60,23 @@ function detectGuidedQa(text) {
   const t = normalizeText(text);
   if (!t) return null;
 
+  // Contact / inquiry
+  if (
+    t.includes("問い合わせ") ||
+    t.includes("お問合せ") ||
+    t.includes("お問い合わせ") ||
+    t.includes("連絡先") ||
+    t.includes("サポート") ||
+    (t.includes("メール") && (t.includes("教") || t.includes("どこ") || t.includes("連絡")))
+  ) {
+    return {
+      key: "contact",
+      text:
+        "【利用者様アカウント】\nお困りごとがあれば、以下までご連絡ください😊\n📩 お問い合わせフォーム：https://toyutoyu.com/contact-form\n✉️ メール：toyutoyu@axil-inc.com",
+      imageUrls: [],
+    };
+  }
+
   // Q6: English-like payment screen (must be checked before generic payment).
   if ((t.includes("英語") || t.toLowerCase().includes("english")) && (t.includes("支払い") || t.includes("決済") || t.includes("画面"))) {
     return {
