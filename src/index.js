@@ -8,6 +8,7 @@ const { pushLineMessage, replyLineMessage, broadcastLineMessage } = require("./n
 const { verifyLineSignature } = require("./lineWebhook");
 const { LineSessionStore } = require("./lineSessionStore");
 const { authCheck, getUserPoints } = require("./toyutoyuApi");
+const { generateAiReply } = require("./aiResponder");
 
 const app = express();
 
@@ -27,6 +28,9 @@ const TOYUTOYU_WP_BASE_URL = getEnv("TOYUTOYU_WP_BASE_URL", { defaultValue: "htt
 const LOGIN_FLOW_TTL_MS = Number(getEnv("LOGIN_FLOW_TTL_MS", { defaultValue: String(10 * 60 * 1000) }));
 const LOGGED_IN_TTL_MS = Number(getEnv("LOGGED_IN_TTL_MS", { defaultValue: String(60 * 60 * 1000) }));
 
+const OPENAI_API_KEY = getEnv("OPENAI_API_KEY", { defaultValue: "" });
+const OPENAI_MODEL = getEnv("OPENAI_MODEL", { defaultValue: "gpt-4o" });
+
 const sessionStore = new LineSessionStore({
   loginFlowTtlMs: LOGIN_FLOW_TTL_MS,
   loggedInTtlMs: LOGGED_IN_TTL_MS,
@@ -40,6 +44,25 @@ function isValidEmail(email) {
   const v = String(email ?? "").trim();
   if (!v) return false;
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+}
+
+function isAiEligibleText(text) {
+  const t = normalizeText(text);
+  if (!t) return false;
+  // Don't send credential-related text to AI.
+  if (t.includes("パスワード")) return false;
+  // Commands are handled elsewhere.
+  if (t === "ログイン" || t === "ポイント" || t === "キャンセル") return false;
+  return true;
+}
+
+async function replyUsage({ replyToken }) {
+  await replyLineMessage({
+    channelAccessToken: LINE_CHANNEL_ACCESS_TOKEN,
+    replyToken,
+    text:
+      "操作:\n- ログイン:『ログイン』→メールアドレス→パスワード\n- ポイント: ログイン後に『ポイント』\n- 中断:『キャンセル』",
+  });
 }
 
 async function handleLineText({ userId, replyToken, text }) {
@@ -105,13 +128,52 @@ async function handleLineText({ userId, replyToken, text }) {
     return;
   }
 
-  const sess = sessionStore.get(userId);
+  // If user is NOT in login flow, route other messages to AI (support/inquiry).
+  const current = sessionStore.get(userId);
+  if (!current || current.state !== "login") {
+    if (t.includes("パスワード")) {
+      await replyLineMessage({
+        channelAccessToken: LINE_CHANNEL_ACCESS_TOKEN,
+        replyToken,
+        text:
+          "パスワードに関する案内です。ログインは『ログイン』→メールアドレス→パスワードの順で進めてください。\nパスワードの再設定などはサブスク詳細ページもあわせてご確認ください: https://toyutoyu.com/price",
+      });
+      return;
+    }
+
+    if (!OPENAI_API_KEY) {
+      await replyUsage({ replyToken });
+      return;
+    }
+
+    if (!isAiEligibleText(t)) {
+      await replyUsage({ replyToken });
+      return;
+    }
+
+    try {
+      const aiText = await generateAiReply({ apiKey: OPENAI_API_KEY, model: OPENAI_MODEL, userText: t });
+      await replyLineMessage({
+        channelAccessToken: LINE_CHANNEL_ACCESS_TOKEN,
+        replyToken,
+        text: aiText || "恐れ入ります、うまく回答を生成できませんでした。『ログイン』『ポイント』などをお試しください。",
+      });
+    } catch (err) {
+      const msg = err && typeof err === "object" && "message" in err ? err.message : String(err);
+      await notifyConsole(`AI reply error: ${msg}`);
+      await replyLineMessage({
+        channelAccessToken: LINE_CHANNEL_ACCESS_TOKEN,
+        replyToken,
+        text: "恐れ入ります、ただいま自動応答が混み合っています。少し時間をおいてからもう一度お試しください。",
+      });
+    }
+
+    return;
+  }
+
+  const sess = current;
   if (!sess || sess.state !== "login") {
-    await replyLineMessage({
-      channelAccessToken: LINE_CHANNEL_ACCESS_TOKEN,
-      replyToken,
-      text: "操作: 「ログイン」→ メールアドレス → パスワード の順に送ってください。",
-    });
+    await replyUsage({ replyToken });
     return;
   }
 
