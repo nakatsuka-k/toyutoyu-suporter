@@ -1,4 +1,9 @@
-async function pushLineMessage({ channelAccessToken, to, text }) {
+function normalizeLineMessages({ text, messages }) {
+  if (Array.isArray(messages) && messages.length > 0) return messages;
+  return [{ type: "text", text: String(text ?? "") }];
+}
+
+async function pushLineMessage({ channelAccessToken, to, text, messages }) {
   const res = await fetch("https://api.line.me/v2/bot/message/push", {
     method: "POST",
     headers: {
@@ -7,7 +12,7 @@ async function pushLineMessage({ channelAccessToken, to, text }) {
     },
     body: JSON.stringify({
       to,
-      messages: [{ type: "text", text }],
+      messages: normalizeLineMessages({ text, messages }),
     }),
   });
 
@@ -17,7 +22,7 @@ async function pushLineMessage({ channelAccessToken, to, text }) {
   }
 }
 
-async function replyLineMessage({ channelAccessToken, replyToken, text }) {
+async function replyLineMessage({ channelAccessToken, replyToken, text, messages }) {
   const res = await fetch("https://api.line.me/v2/bot/message/reply", {
     method: "POST",
     headers: {
@@ -26,7 +31,7 @@ async function replyLineMessage({ channelAccessToken, replyToken, text }) {
     },
     body: JSON.stringify({
       replyToken,
-      messages: [{ type: "text", text }],
+      messages: normalizeLineMessages({ text, messages }),
     }),
   });
 

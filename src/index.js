@@ -56,12 +56,143 @@ function isAiEligibleText(text) {
   return true;
 }
 
+function detectGuidedQa(text) {
+  const t = normalizeText(text);
+  if (!t) return null;
+
+  // Q6: English-like payment screen (must be checked before generic payment).
+  if ((t.includes("英語") || t.toLowerCase().includes("english")) && (t.includes("支払い") || t.includes("決済") || t.includes("画面"))) {
+    return {
+      key: "payment_english_screen",
+      text:
+        "支払い画面に英語のような表示が出ても、ポイント支払いは完了している場合があります😊\nそのまま入館していただいて問題ありません。\n\nこの表示は、システムメンテナンスや一時的な不具合が原因で出ることがあります。復旧までお待ちいただけますと幸いです。ご迷惑をおかけし、申し訳ございません。",
+      imageUrls: ["https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/error-test.png"],
+    };
+  }
+
+  // Q1: Password reset
+  if (t.includes("パスワード") && (t.includes("再設定") || t.includes("リセット") || t.includes("忘"))) {
+    return {
+      key: "password_reset",
+      text: "パスワードの再設定は、以下の画像の手順で行っていただけます📱",
+      imageUrls: [
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488825_0.jpg",
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488826_0.jpg",
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488827_0.jpg",
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488828_0.jpg",
+      ],
+    };
+  }
+
+  // Q3: New registration
+  if (t.includes("新規登録") || t.includes("登録方法") || t.includes("アカウント作成") || t.includes("会員登録")) {
+    return {
+      key: "signup",
+      text:
+        "新規登録は、以下のQRコードを読み取っていただき、画像の手順に沿って進めてください😊\n\n不明点があれば、状況を教えてください。",
+      imageUrls: [
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488834_0.jpg",
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488836_0.jpg",
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488837_0.jpg",
+      ],
+    };
+  }
+
+  // Q4: Account deletion
+  if ((t.includes("アカウント") || t.includes("会員")) && (t.includes("削除") || t.includes("退会"))) {
+    return {
+      key: "account_delete",
+      text: "アカウント削除は、以下の画像の手順で行っていただけます🧾",
+      imageUrls: [
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488842_0.jpg",
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488843_0.jpg",
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488844_0.jpg",
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488845_0.jpg",
+      ],
+    };
+  }
+
+  // Q5: Subscription cancellation
+  if ((t.includes("サブスク") || t.includes("定期")) && (t.includes("解約") || t.includes("停止") || t.includes("キャンセル"))) {
+    return {
+      key: "subscription_cancel",
+      text: "サブスクの解約は、以下の画像の手順で可能です🙆‍♂️",
+      imageUrls: [
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488847_0.jpg",
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488848_0.jpg",
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488849_0.jpg",
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488850_0.jpg",
+      ],
+    };
+  }
+
+  // Q2: Point purchase
+  if (t.includes("ポイント") && (t.includes("購入") || t.includes("買") || t.includes("チャージ") || t.includes("課金"))) {
+    return {
+      key: "points_purchase",
+      text: "ポイントの購入は、以下の画像の手順で可能です💳（サブスク・一括・チャージ対応）",
+      imageUrls: [
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488832_0.jpg",
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488833_0.jpg",
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488829_0.jpg",
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488830_0.jpg",
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488831_0.jpg",
+      ],
+    };
+  }
+
+  // Q3(2): Facility point payment
+  if ((t.includes("施設") || t.includes("入館")) && t.includes("ポイント") && (t.includes("支払") || t.includes("決済") || t.includes("使"))) {
+    return {
+      key: "facility_payment",
+      text:
+        "施設へのポイント支払いは、以下の方法で可能です😊（※詳細は画像をご確認ください。）",
+      imageUrls: [
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488838_0.jpg",
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488839_0.jpg",
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488840_0.jpg",
+        "https://pub-d1e01f0fee96410f83abf27aa8f5b7c7.r2.dev/S__5488841_0.jpg",
+      ],
+    };
+  }
+
+  return null;
+}
+
+function buildImageMessage(url) {
+  return {
+    type: "image",
+    originalContentUrl: url,
+    previewImageUrl: url,
+  };
+}
+
+async function replyWithImagesIfNeeded({ userId, replyToken, text, imageUrls }) {
+  const urls = Array.isArray(imageUrls) ? imageUrls.filter(Boolean) : [];
+  const allMessages = [{ type: "text", text: String(text ?? "") }, ...urls.map(buildImageMessage)];
+
+  const chunks = [];
+  for (let i = 0; i < allMessages.length; i += 5) {
+    chunks.push(allMessages.slice(i, i + 5));
+  }
+
+  const first = chunks.shift();
+  if (!first) return;
+
+  await replyLineMessage({ channelAccessToken: LINE_CHANNEL_ACCESS_TOKEN, replyToken, messages: first });
+
+  // LINEのreplyは1回限りなので、残りはpushで送る（個別チャット前提）
+  for (const c of chunks) {
+    await pushLineMessage({ channelAccessToken: LINE_CHANNEL_ACCESS_TOKEN, to: userId, messages: c });
+  }
+}
+
 async function replyUsage({ replyToken }) {
   await replyLineMessage({
     channelAccessToken: LINE_CHANNEL_ACCESS_TOKEN,
     replyToken,
     text:
-      "操作:\n- ログイン:『ログイン』→メールアドレス→パスワード\n- ポイント: ログイン後に『ポイント』\n- 中断:『キャンセル』",
+      "操作方法😊\n1) ログイン: 『ログイン』→メールアドレス→パスワード\n2) ポイント確認: ログイン後に『ポイント』\n3) 中断: 『キャンセル』",
   });
 }
 
@@ -128,8 +259,17 @@ async function handleLineText({ userId, replyToken, text }) {
     return;
   }
 
-  // If user is NOT in login flow, route other messages to AI (support/inquiry).
+  // Guided Q&A with images (only when NOT in login flow)
   const current = sessionStore.get(userId);
+  if (!current || current.state !== "login") {
+    const guided = detectGuidedQa(t);
+    if (guided) {
+      await replyWithImagesIfNeeded({ userId, replyToken, text: guided.text, imageUrls: guided.imageUrls });
+      return;
+    }
+  }
+
+  // If user is NOT in login flow, route other messages to AI (support/inquiry).
   if (!current || current.state !== "login") {
     if (t.includes("パスワード")) {
       await replyLineMessage({
@@ -197,6 +337,12 @@ async function handleLineText({ userId, replyToken, text }) {
   }
 
   if (sess.step === "await_password") {
+    const guided = detectGuidedQa(t);
+    if (guided && guided.key === "password_reset") {
+      await replyWithImagesIfNeeded({ userId, replyToken, text: guided.text, imageUrls: guided.imageUrls });
+      return;
+    }
+
     try {
       const result = await authCheck({
         baseUrl: TOYUTOYU_WP_BASE_URL,
@@ -347,9 +493,9 @@ async function notify(text) {
 function formatFailures({ failures }) {
   const lines = failures.map((f) => {
     if (f.error) {
-      return `- ${f.url} ERROR: ${f.error}`;
+      return `・${f.url} エラー: ${f.error}`;
     }
-    return `- ${f.url} HTTP ${f.status} ${f.statusText || ""}`.trim();
+    return `・${f.url} HTTP ${f.status} ${f.statusText || ""}`.trim();
   });
 
   return lines.join("\n");
